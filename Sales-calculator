@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Road Rage Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <div id="player-car"></div>
+    <div id="score">Score: 0</div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #333;
+  font-family: Arial, sans-serif;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #555;
+}
+
+#player-car {
+  position: absolute;
+  width: 50px;
+  height: 80px;
+  background-color: red;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#score {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  font-size: 20px;
+}
+const playerCar = document.getElementById("player-car");
+const gameContainer = document.getElementById("game-container");
+const scoreDisplay = document.getElementById("score");
+
+let score = 0;
+let playerX = 50; // Initial horizontal position of the car
+const playerSpeed = 10; // Speed of the car movement
+
+// Move player car
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft" && playerX > 0) {
+    playerX -= playerSpeed;
+  } else if (e.key === "ArrowRight" && playerX < 100) {
+    playerX += playerSpeed;
+  }
+  playerCar.style.left = `${playerX}%`;
+});
+
+// Spawn obstacles
+function spawnObstacle() {
+  const obstacle = document.createElement("div");
+  obstacle.className = "obstacle";
+  obstacle.style.left = `${Math.random() * 90}%`; // Random horizontal position
+  gameContainer.appendChild(obstacle);
+
+  // Move obstacle down
+  let obstacleY = 0;
+  const obstacleInterval = setInterval(() => {
+    obstacleY += 5;
+    obstacle.style.top = `${obstacleY}px`;
+
+    // Check for collision
+    if (obstacleY > window.innerHeight - 100 && obstacleY < window.innerHeight - 50) {
+      const obstacleX = parseFloat(obstacle.style.left);
+      if (Math.abs(obstacleX - playerX) < 10) {
+        alert(`Game Over! Your score: ${score}`);
+        clearInterval(obstacleInterval);
+        location.reload();
+      }
+    }
+
+    // Remove obstacle when it goes off-screen
+    if (obstacleY > window.innerHeight) {
+      obstacle.remove();
+      score += 1;
+      scoreDisplay.textContent = `Score: ${score}`;
+      clearInterval(obstacleInterval);
+    }
+  }, 20);
+}
+
+// Spawn obstacles every 2 seconds
+setInterval(spawnObstacle, 2000);
